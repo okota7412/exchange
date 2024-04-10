@@ -1,0 +1,22 @@
+{% extends 'labo_app/base.html' %}
+{% load static%}
+{% block title %}登録ページ{% endblock %}
+{% block content %}
+    <h1>ユーザー登録</h1>
+    <div class="form-group p-3">
+        <form action="{% url 'signup' %}" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="row p-2">
+                    <div>{{ field.errors }}</div>
+                    <div class="col-md-3">{{ field.label_tag }}</div>
+                    <div class="col-md-3">{{ field }}</div>
+                    {% if field.help_text %}
+                    <div>{{ field.help_text|safe }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <p><input type="submit" value="登録"></p>
+        </form>
+    </div>
+{% endblock %}

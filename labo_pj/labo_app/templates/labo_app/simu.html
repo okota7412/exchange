@@ -1,0 +1,376 @@
+{% extends 'labo_app/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}計算ページ{% endblock %}
+{% block css_js %}
+    <link href="{% static 'labo_app/css/loading.css' %}" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock %}
+{% block content %}
+    <div class="form-group p-3">
+        {% comment %} <form action="{% url 'result'%}" method="post" class="row g-3"> {% endcomment %}
+        <form class="row g-3" id="parameter_form" name="parameter_form" action="{% url 'result'%}" method="post">
+            {% csrf_token %}
+            <div class="form-molecular row g-3" id="form_area1">
+                <div class="col-md-5">
+                    <label class="form-label">分子名:
+                        <select name="molecular_name" class="required form-select">
+                            <option value="水" selected="">水</option>                  
+                            <option value="アセチレン">アセチレン</option>                  
+                            <option value="アセトン">アセトン</option>                  
+                            <option value="アンモニア">アンモニア</option>                  
+                            <option value="エタノール">エタノール</option>                  
+                            <option value="エチレン">エチレン</option>                  
+                            <option value="シクロブタン">シクロブタン</option>                  
+                            <option value="ベンゼン">ベンゼン</option>                  
+                            <option value="メタノール">メタノール</option>                  
+                            {% comment %} <option value="塩化水素">塩化水素</option>                   {% endcomment %}
+                            <option value="酢酸">酢酸</option>                
+                        </select>
+                    </label>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">分子数:
+                        <input type="number" name="molecular_number" value="100" class="required form-control" required="">
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <input type="button" name="add" value="フォームを追加" onclick="addForm()"></input>
+            </div>
+            <p></p>
+            <div class="row col-md-6">
+                <div class="col-md-6">
+                    <label class="form-check-label">アンサンブル:
+                        <div><input type="radio" name="ensemble" value="NVT" onclick="nvtBox()" checked="">NVT
+                        <input type="radio" name="ensemble" value="NPT" onclick="nptPressure()">NPT</div>
+                    </label>
+                </div>
+                <div class="col-md-6" id="pressure_area" style="visibility: hidden;">
+                    <label class="form-label">圧力(atm):
+                        <input type="number" name="pressure" step="any" class="form-control" id="id_pressure">
+                    </label>
+                </div>
+            </div>
+            <p></p>
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">温度(℃):
+                        {% render_field SimForm.temperature class+="required form-control" %}
+                    </label>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">シミュレーション時間(ns):
+                        {% render_field SimForm.exe_time class+="required form-control" %}
+                    </label>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">時間刻み(fs):
+                        {% render_field SimForm.exe_step class+="required form-control" %}
+                    </label>
+                </div>
+            </div>
+            <p></p>
+            <div class="row" id="box_area" style="display: ;">
+                <div class="col-md-3">
+                    <label class="form-check-label">ボックス:
+                        <div><input type="radio" name="box_select" value="立方体" id="box_select_0" checked="">立方体
+                        <input type="radio" name="box_select" value="直方体" id="box_select_1">直方体</div>
+                    </label>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">横幅(nm):
+                        <input type="number" class="required form-control" required="" name="box_size" id="width" oninput="changeSizeByWidth()" min="0"> 
+                    </label>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">縦幅(nm):
+                        <input type="number" class="required form-control" required="" name="box_size" id="depth" oninput="changeSizeByDepth()" min="0"> 
+                    </label>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">高さ(nm):
+                        <input type="number" class="required form-control" required="" name="box_size" id="height" oninput="changeSizeByHeight()" min="0"> 
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="submit-area">
+                <div class="col-md-6">
+                    <button type="submit" class="submit" id="simulation" onclick=submitForm("simulation")>シミュレーション実行</button>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="submit" id="result" onclick=submitForm("result") formaction="{% url "result" %}" formmethod="post" style="visibility: hidden;">結果ページへ</button>    
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {% comment %} <a href = "{% url 'execute_command'%}">ajax確認</a> {% endcomment %}
+
+    <p></p>
+    <div id="output">実行結果がこちらに表示されます。</div>
+    
+    <style>
+        #output {
+            height: 200px;               /* 縦幅を200pxに指定 */
+            border: 1px solid #000;      /* わかりやすくボーダーを引く */
+            overflow-y: scroll;          /* 縦方向にスクロール可能にする */
+        }
+    </style>
+
+
+    <script src="{% static "labo_app/js/loading.js" %}"></script>
+    <script src="{% static "labo_app/js/dynamicForm.js" %}"></script>
+    <script src="{% static "labo_app/js/boxSizeForm.js" %}"></script>
+    <script src="{% static "labo_app/js/selectEnsemble.js" %}"></script>
+    {% comment %} <script src="{% static "labo_app/js/ajax_gmx.js" %}"></script> {% endcomment %}
+    <script>
+        var csrftoken = '{{ csrf_token }}';
+        var user_id = {{ user.id  }}
+        console.log("user_id = " + user_id)
+
+
+        // Enterキーで送信されるのを防ぐ
+        $(document).ready(function () {
+            $('#parameter_form').on('keydown', function (event) {
+                // キーコードが 13（Enter キー）の場合
+                if (event.keyCode === 13) {
+                    // フォーム送信をキャンセル
+                    event.preventDefault();
+                }
+            });
+        });
+
+        // フォーム送信時の処理
+        function submitForm(buttonValue){
+            event.preventDefault();
+
+            // ボタンの値に応じて異なる処理を行う
+            if (buttonValue === 'simulation') {
+                // ボタン1がクリックされた場合の処理
+                console.log('simulation clicked');
+                simulation();
+                // ここに異なる動作を追加
+            } else if (buttonValue === 'result') {
+                // ボタン2がクリックされた場合の処理
+                console.log('result clicked');
+                $('#parameter_form').submit()
+                // ここに異なる動作を追加
+            }
+        }
+
+        function simulation(){
+            var molecular_name = getValues("molecular_name");
+            var molecular_number = getValues("molecular_number");
+            var box_size = getValues("box_size");
+            var pressure = getValues("pressure");
+            var ensemble = document.querySelector('[name="ensemble"]:checked').value;
+            var temperature = getValues("temperature");
+            var exe_time = getValues("exe_time");
+            var exe_step = getValues("exe_step");
+            var parameter = {"molecular_name": molecular_name,
+                            "molecular_number": molecular_number,
+                            "box_size": box_size,
+                            "pressure": pressure,
+                            "ensemble": ensemble,
+                            "temperature": temperature,
+                            "exe_time": exe_time,
+                            "exe_step": exe_step,
+                            };
+            var intervalID;
+
+            console.log(JSON.stringify(parameter));
+            
+            $.ajax({
+                 url: '{% url "ajax_exe_gmx_com" %}',  // コマンドを実行するエンドポイントのURL
+                 type: 'POST',
+                 data: JSON.stringify(parameter),
+                 dataType: 'json',
+                 contentType: 'application/json',
+                 headers: {
+                     'X-CSRFToken': csrftoken
+                 }
+             }).done(function(data) {
+                 if(data.error){
+                      output.innerHTML = convertNewlineToBr(data.error);
+                      loading = document.querySelector(".loading");
+                      submit = document.getElementById("simulation");
+                      loading.remove();
+                      submit.textContent = 'シミュレーション実行';
+                 }
+                 else{
+                      intervalID = setInterval(fetchData, 5000);
+                      processHeavyTask(intervalID);
+                 }
+                 console.log(data);
+                
+                 // gmx mdrun md より上でエラーが発生していた時は、output.innerHTMLでそのエラー文を表示する
+                 // うまく成功したときは、setIntervalとprocessHeavyTask()を実行する
+                 console.log('done   リクエストが成功しました。');
+             }).always(function() { 
+                 console.log('always リクエストが完了しました。');
+            });
+        }
+
+        /*
+        // $('#parameter_form').submit(function(event) {
+        $('#parameter_form').submit(function(event) {
+            event.preventDefault();
+            
+            var molecular_name = getValues("molecular_name");
+            var molecular_number = getValues("molecular_number");
+            var box_size = getValues("box_size");
+            var pressure = getValues("pressure");
+            var ensemble = document.querySelector('[name="ensemble"]:checked').value;
+            var temperature = getValues("temperature");
+            var exe_time = getValues("exe_time");
+            var exe_step = getValues("exe_step");
+            var parameter = {"molecular_name": molecular_name,
+                            "molecular_number": molecular_number,
+                            "box_size": box_size,
+                            "pressure": pressure,
+                            "ensemble": ensemble,
+                            "temperature": temperature,
+                            "exe_time": exe_time,
+                            "exe_step": exe_step,
+                            };
+            var intervalID;
+            // var intervalID = setInterval(fetchData, 5000); // ファイルが作成されてからfetchDataを実行させたい
+
+            console.log(JSON.stringify(parameter));
+            
+            $.ajax({
+                 url: '{% url "ajax_exe_gmx_com" %}',  // コマンドを実行するエンドポイントのURL
+                 type: 'POST',
+                 data: JSON.stringify(parameter),
+                 dataType: 'json',
+                 contentType: 'application/json',
+                 headers: {
+                     'X-CSRFToken': csrftoken
+                 }
+             }).done(function(data) {
+                 if(data.error){
+                      output.innerHTML = convertNewlineToBr(data.error);
+                      loading = document.querySelector(".loading");
+                      submit = document.getElementById("simulation");
+                      loading.remove();
+                      submit.textContent = 'シミュレーション実行';
+                 }
+                 else{
+                      intervalID = setInterval(fetchData, 5000);
+                      processHeavyTask(intervalID);
+                 }
+                
+                 // gmx mdrun md より上でエラーが発生していた時は、output.innerHTMLでそのエラー文を表示する
+                 // うまく成功したときは、setIntervalとprocessHeavyTask()を実行する
+                 console.log('done   リクエストが成功しました。');
+             }).always(function() { 
+                 console.log('always リクエストが完了しました。');
+            });
+        });
+        */
+
+        // gmx mdrun md を実行するためのajax 
+        function processHeavyTask(intervalID){
+            $.ajax({
+                url: '{% url "ajax_heavy_task" %}'
+                //type: 'POST',
+                //data: {},
+                //dataType: 'json',
+                //contentType: 'application/json',
+                //headers: {
+                //    'X-CSRFToken': csrftoken
+                //}
+            }).done(function(data) {
+                console.log('processHeavyTask done リクエストが完了しました。');
+                if(data.error){
+                    console.log("エラーが起こっています");
+                }else{
+                    document.getElementById("result").style.visibility = "visible"; 
+                }
+                console.log(data);
+            }).always(function() { 
+                console.log('processHeavyTask always リクエストが完了しました。');
+                fetchData();
+                clearInterval(intervalID);
+                console.log('setInterval()をクリアしました')
+                loading = document.querySelector(".loading");
+                submit = document.getElementById("simulation");
+                loading.remove();
+                submit.textContent = 'シミュレーション実行';
+            });
+        }
+
+        // 5秒ごとに実行結果を取得する関数
+        function fetchData() {
+            $.ajax({
+                url: '{% url "get_output" %}',  // コマンドの実行結果を取得するエンドポイントのURL(user_idを定義する必要がある)
+                type: 'POST',
+                data: JSON.stringify({ user_id: user_id}),
+                dataType: 'json',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            }).done(function(data) {
+                console.log("feachData success\n");
+                console.log(data.content);
+                console.log(data.error);
+                // 受信したデータを表示
+                var content = convertNewlineToBr(data.content);
+                //$('#output').text(content);
+                output.innerHTML = content;
+                // スクロール位置を一番下に設定
+                output.scrollTop = output.scrollHeight;
+            }).fail(function() {
+                alert('エラーが起きました');
+            });
+        }
+
+        // CSRFトークンを取得する関数
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // クッキー名が一致する場合、値を取得
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // 改行コードを改行タグに置き換える関数
+        function convertNewlineToBr(text) {
+            return text.replace(/\n/g, '<br>');
+        }
+
+        // リストの形で要素の値を取得する関数
+        function getValues(name) {
+            // 同じ名前の要素を取得
+            var elements = document.getElementsByName(name);
+            var len = elements.length;
+
+            // 要素の数に応じて処理を分岐
+            if (len === 0) {
+                return -1;
+            } else if(len === 1){
+                // 要素が一つだけの場合、その要素の値を返す
+                var value = elements[0].value;
+                return value;
+            } else {
+                // 複数の要素がある場合、それぞれの要素の値を配列に格納して返す
+                var values = [];
+                for (var i = 0; i < elements.length; i++) {
+                    values.push(elements[i].value);
+                }
+                return values;
+            }
+        }
+    </script>
+{% endblock %}
+

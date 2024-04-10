@@ -1,0 +1,39 @@
+;
+;	File 'topol.top' was generated
+;	By user: unknown (0)
+;	On host: 5986c8b3b398
+;	At date: Thu Jan 11 05:55:36 2024
+;
+;	This is a standalone topology file
+;
+;	Created by:
+;	            :-) GROMACS - gmx pdb2gmx, 2021.4-Ubuntu-2021.4-2 (-:
+;	
+;	Executable:   /usr/bin/gmx
+;	Data prefix:  /usr
+;	Working dir:  /home/labo_pj/labo_app/gmxapp/user_id/5
+;	Command line:
+;	  gmx pdb2gmx -f ./output/box.pdb -o ./output/conf.gro -p topol.top -i posre.itp -ff gaff -water tip3p
+;	Force field was read from current directory or a relative path - path added.
+;
+
+; Include forcefield parameters
+#include "./gaff.ff/forcefield.itp"
+
+; Include water topology
+#include "./gaff.ff/tip3p.itp"
+
+#ifdef POSRES_WATER
+; Position restraint for each water oxygen
+[ position_restraints ]
+;  i funct       fcx        fcy        fcz
+   1    1       1000       1000       1000
+#endif
+
+[ system ]
+; Name
+Gnomes, ROck Monsters And Chili Sauce
+
+[ molecules ]
+; Compound        #mols
+SOL               100

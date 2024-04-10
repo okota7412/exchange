@@ -1,0 +1,289 @@
+{% extends 'labo_app/base.html' %}
+{% load static%}
+{% load widget_tweaks %}
+{% block title %}結果ページ{% endblock %}
+{% block css_js %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+    <div class='row p-3'>
+        <div class='col-md-6'>
+            <table>
+                <tr>
+                  <td>・アンサンブル</td>
+                  <td>: {{ensemble}}</td>
+                </tr>
+                <tr>
+                    {% if ensemble == "NPT"%}
+                        <td>・圧力</td>
+                        <td>: {{pressure}} atm</td>
+                    {% elif ensemble == "NVT"%}
+                        <td>・ボックスサイズ</td>
+                        <td>: {% for i in box_size %}{% if forloop.last %}<span>{{i}} nm</span>{% else %}<span>{{i}}, </span>{% endif %}{% endfor %}</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                  <td>・温度</td>
+                  <td>: {{temperature}} ℃</td>
+                </tr>
+                <tr>
+                  <td>・シミュレーション時間</td>
+                  <td>: {{exe_time}} ns</td>
+                </tr>
+                <tr>
+                    <td>・時間刻み</td>
+                    <td>: {{exe_step}} fs</td>
+                </tr>
+            </table>
+        </div>
+        <div class='col-md-2'>
+            <div>分子名</div>
+            {% for i in molecular_name %}<div>・{{i}}</div>{% endfor %}
+        </div>
+        <div class='col-md-3'>
+            <div>分子数</div>
+            {% for i in molecular_number %}<div>{{i}}個</div>{% endfor %}
+        </div>
+
+        <div>
+            <a href = "{% url 'gmx_gztar' user_id %}" class="download">gmx.tar.gzをダウンロード</a><p></p>
+        </div>
+
+        <div>
+            <div>MSD解析</div>
+            <form>
+                <label class="form-label">MSD解析をしたい分子：
+                    <select id="msd" class="required form-select">
+                        {% for i in molecular_name %}
+                            <option value={{i}}>{{i}}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button type="submit" onclick=submitForm("msd")>MSD実行</button>
+            </form>
+        </div>
+            
+        <div>
+            <div>RDF解析</div>
+            <form>
+                <label class="form-label">中心となる分子：
+                    <select id="ref" class="required form-select">
+                        {% for i in molecular_name %}
+                            <option value={{i}}>{{i}}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="form-label">対象分子：
+                    <select id="sel" class="required form-select">
+                        {% for i in molecular_name %}
+                            <option value={{i}}>{{i}}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button type="submit" onclick=submitForm("rdf")>RDF実行</button>
+            </form>
+        </div>
+        <canvas id="mychart-scatter"></canvas>
+        <div id="difCoe" align="center"></div>
+    </div>
+
+    <script>
+        var csrftoken = '{{ csrf_token }}';
+        var myChart
+        var difCoe,xMsd,yMsd,msd_mol; //difCoe = 拡散係数 
+        var xRdf,yRdf,ref_mol,sel_mol;
+        console.log({{user_id}});
+
+        // Enterキーで送信されるのを防ぐ
+        $(document).ready(function () {
+            $('#parameter_form').on('keydown', function (event) {
+                // キーコードが 13（Enter キー）の場合
+                if (event.keyCode === 13) {
+                    // フォーム送信をキャンセル
+                    event.preventDefault();
+                }
+            });
+        });
+
+        // フォーム送信時の処理
+        function submitForm(buttonValue){
+            event.preventDefault();
+            // すでにグラフ（インスタンス）が生成されている場合は、グラフを破棄する
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            // ボタンの値に応じて異なる処理を行う
+            if (buttonValue === 'msd') {
+                // ボタン1がクリックされた場合の処理
+                console.log('msd clicked');
+                if(msd_mol === document.getElementById("msd").value){
+                    console.log("一度実行した");
+                    chartMsd(xMsd, yMsd, msd_mol, difCoe);
+                }else{
+                    analyzeMsd();
+                }
+            } else if (buttonValue === 'rdf') {
+                // ボタン2がクリックされた場合の処理
+                console.log('rdf clicked');
+                if(ref_mol === document.getElementById("ref").value && sel_mol === document.getElementById("sel").value){
+                    console.log("一度実行した");
+                    chartRdf(xRdf, yRdf, ref_mol, sel_mol);
+                }else{
+                    analyzeRdf(); 
+                }               
+            }
+        }
+
+        // MSDを実行するAjax 
+        function analyzeMsd(){
+            msd_mol = document.getElementById("msd").value;
+            var post_data = {"msd_mol": msd_mol, "exe_time": {{exe_time}}};
+            $.ajax({
+                url: '{% url "ajax_msd" %}',  // コマンドを実行するエンドポイントのURL
+                type: 'POST',
+                data: JSON.stringify(post_data),
+                dataType: 'json',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+             }).done(function(data) {
+                if(data.error){
+                    console.log("エラーが起きました");
+                }
+                else{
+                    console.log("成功しました");
+                    xMsd = data.x;
+                    yMsd = data.y;
+                    difCoe = data.difCoe
+                    chartMsd(xMsd, yMsd, msd_mol, difCoe);
+                }
+                    console.log('done   リクエストが成功しました。');
+             }).always(function() { 
+                    console.log('always リクエストが完了しました。');
+            });
+        }
+
+        // RDFを実行するAjax 
+        function analyzeRdf(){
+            ref_mol = document.getElementById("ref").value;
+            sel_mol = document.getElementById("sel").value;
+            var post_data = {"ref_mol": ref_mol, "sel_mol": sel_mol, "exe_time": {{exe_time}}};
+            console.log(JSON.stringify(post_data));
+            
+            $.ajax({
+                url: '{% url "ajax_rdf" %}',  // コマンドを実行するエンドポイントのURL
+                type: 'POST',
+                data: JSON.stringify(post_data),
+                dataType: 'json',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+             }).done(function(data) {
+                if(data.error){
+                    console.log("エラーが起きました");
+                }
+                else{
+                    console.log("成功しました");
+                    xRdf = data.x;
+                    yRdf = data.y;
+                    chartRdf(xRdf, yRdf, ref_mol, sel_mol);
+                }
+                    console.log('done   リクエストが成功しました。');
+             }).always(function() { 
+                    console.log('always リクエストが完了しました。');
+            });
+        }
+
+        function chartMsd(x,y,msd_mol,difCoe){
+            var ctx = document.getElementById('mychart-scatter');
+            // 正規表現を使用して小数部分を取得
+            var decimalValue = difCoe.match(/=\s*([\d.]+)/)[1];
+
+            // 正規表現を使用して単位部分を取得
+            var unitValue = difCoe.match(/\(([^)]+)\)/g)[1];
+
+            console.log(difCoe);
+            document.getElementById('difCoe').innerText = "D = "+decimalValue+" "+unitValue;
+            var scatterData = scatter(x,y);
+            
+            myChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: msd_mol+' MSD',
+                        data: scatterData,
+                        backgroundColor: '#f88',
+                    }],
+                },
+                options: {
+                    scales: {
+                        y: { title: 
+                            {display: true,
+                             //text: 'MSD / nm^2',
+                             text: 'MSD / nm\u{00B2}',
+                             color: 'blue',
+                             font: {size: 20}, 
+                            } 
+                        },
+                        x: { title: 
+                            {display: true,
+                             text: 't / ps',
+                             color: 'blue',
+                             font: {size: 20},
+                            } 
+                        },
+                    },
+                },
+            });
+        }
+
+        function chartRdf(x,y,ref_mol,sel_mol){
+            var ctx = document.getElementById('mychart-scatter');
+            document.getElementById('difCoe').innerText = "";
+            var scatterData = scatter(x,y);
+            myChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: ref_mol+'-'+sel_mol+' RDF',
+                        data: scatterData,
+                        backgroundColor: '#f88',
+                    }],
+                },
+                options: {
+                    scales: {
+                        y: { title: 
+                            {display: true,
+                             text: 'g(r)',
+                             color: 'blue',
+                             font: {size: 20}, 
+                            } 
+                        },
+                        x: { title: 
+                            {display: true,
+                             text: 'r / nm',
+                             color: 'blue',
+                             font: {size: 20},
+                            },
+                            max: 0.9,
+                        },
+                    },
+                },
+            });
+        }
+
+        function scatter(x,y){
+            var scatterData = [];
+            console.log(x.length)
+            for(var i=0; i<x.length; i++){
+                scatterData.push({x:x[i], y:y[i]});
+            }
+            return scatterData;
+        }
+        
+    </script>
+{% endblock %}

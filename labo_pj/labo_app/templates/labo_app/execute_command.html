@@ -1,0 +1,72 @@
+{% extends 'labo_app/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}ajaxページ{% endblock %}
+{% block css %}
+    <link href="{% static 'labo_app/css/loading.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<form id="commandForm">
+    <label for="commandInput">Command:</label>
+    <input type="text" id="commandInput" name="command">
+    <button type="submit">Execute</button>
+</form>
+<div id="output"></div>
+
+<script>
+    // フォーム送信時の処理
+    $('#commandForm').submit(function(event) {
+        event.preventDefault();
+        //var formData = $(this).serialize();
+        var command = document.getElementById('commandInput').value;
+        var csrftoken = '{{ csrf_token }}';
+        console.log(JSON.stringify({ command: command}))
+
+        // Ajaxリクエストを作成
+        $.ajax({
+            url: '{% url "execute_command" %}',  // コマンドを実行するエンドポイントのURL
+            type: 'POST',
+            data: JSON.stringify({ command: command}),
+            dataType: 'json',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function(data) {
+                // 5秒ごとにfetchData関数を実行
+                setInterval(fetchData, 5000);
+            }
+        });
+    });
+
+    // 5秒ごとに実行結果を取得する関数
+    function fetchData() {
+        $.ajax({
+            url: '{% url "get_output" %}',  // コマンドの実行結果を取得するエンドポイントのURL
+            type: 'GET',
+            success: function(data) {
+                // 受信したデータを表示
+                $('#output').text(data.output);
+            }
+        });
+    }
+
+    // CSRFトークンを取得する関数
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // クッキー名が一致する場合、値を取得
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,83 @@
+              :-) GROMACS - gmx mdrun, 2021.4-Ubuntu-2021.4-2 (-:
+
+                            GROMACS is written by:
+     Andrey Alekseenko              Emile Apol              Rossen Apostolov     
+         Paul Bauer           Herman J.C. Berendsen           Par Bjelkmar       
+       Christian Blau           Viacheslav Bolnykh             Kevin Boyd        
+     Aldert van Buuren           Rudi van Drunen             Anton Feenstra      
+    Gilles Gouaillardet             Alan Gray               Gerrit Groenhof      
+       Anca Hamuraru            Vincent Hindriksen          M. Eric Irrgang      
+      Aleksei Iupinov           Christoph Junghans             Joe Jordan        
+    Dimitrios Karkoulis            Peter Kasson                Jiri Kraus        
+      Carsten Kutzner              Per Larsson              Justin A. Lemkul     
+       Viveca Lindahl            Magnus Lundborg             Erik Marklund       
+        Pascal Merz             Pieter Meulenhoff            Teemu Murtola       
+        Szilard Pall               Sander Pronk              Roland Schulz       
+       Michael Shirts            Alexey Shvetsov             Alfons Sijbers      
+       Peter Tieleman              Jon Vincent              Teemu Virolainen     
+     Christian Wennberg            Maarten Wolf              Artem Zhmurov       
+                           and the project leaders:
+        Mark Abraham, Berk Hess, Erik Lindahl, and David van der Spoel
+
+Copyright (c) 1991-2000, University of Groningen, The Netherlands.
+Copyright (c) 2001-2019, The GROMACS development team at
+Uppsala University, Stockholm University and
+the Royal Institute of Technology, Sweden.
+check out http://www.gromacs.org for more information.
+
+GROMACS is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License
+as published by the Free Software Foundation; either version 2.1
+of the License, or (at your option) any later version.
+
+GROMACS:      gmx mdrun, version 2021.4-Ubuntu-2021.4-2
+Executable:   /usr/bin/gmx
+Data prefix:  /usr
+Working dir:  /home/labo_pj/labo_app/gmxapp/user_id/1
+Command line:
+  gmx mdrun -s ./output/md.tpr -deffnm ./output/md -v
+
+Compiled SIMD: SSE4.1, but for this host/run AVX2_256 might be better (see
+log).
+Reading file ./output/md.tpr, VERSION 2021.4-Ubuntu-2021.4-2 (single precision)
+
+NOTE: Parallelization is limited by the small number of atoms,
+      only starting 16 thread-MPI ranks.
+      You can use the -nt and/or -ntmpi option to optimize the number of threads.
+
+Changing nstlist from 10 to 25, rlist from 1.086 to 1.24
+
+Using 16 MPI threads
+Using 2 OpenMP threads per tMPI thread
+
+starting mdrun 'Gnomes, ROck Monsters And Chili Sauce'
+1000000 steps,   2000.0 ps.
+step 0vol 0.86  imb F 18% step 100, will finish Fri Jan 26 21:51:15 2024vol 0.72  imb F 19% step 200, will finish Fri Jan 26 23:02:14 2024vol 0.62! imb F 35% step 300, will finish Fri Jan 26 21:33:45 2024vol 0.53! imb F 40% step 400, will finish Fri Jan 26 20:42:36 2024vol 0.40! imb F 47% step 500, will finish Fri Jan 26 20:51:38 2024vol 0.39! imb F 41% step 600, will finish Fri Jan 26 19:49:34 2024vol 0.37! imb F 50% step 700, will finish Fri Jan 26 19:15:00 2024vol 0.36! imb F 35% step 800, will finish Fri Jan 26 18:30:40 2024vol 0.37! imb F 60% step 900, will finish Fri Jan 26 17:48:25 2024
+
+Received the TERM signal, stopping within 25 steps
+
+vol 0.37! imb F 34% step 975, will finish Fri Jan 26 17:44:14 2024
+
+Dynamic load balancing report:
+ DLB was turned on during the run due to measured imbalance.
+ Average load imbalance: 36.0%.
+ The balanceable part of the MD step is 40%, load imbalance is computed from this.
+ Part of the total run time spent waiting due to load imbalance: 14.6%.
+ Steps where the load balancing was limited by -rdd, -rcon and/or -dds: X 1 % Y 2 %
+
+NOTE: 14.6 % of the available CPU time was lost due to load imbalance
+      in the domain decomposition.
+      You can consider manually changing the decomposition (option -dd);
+      e.g. by using fewer domains along the box dimension in which there is
+      considerable inhomogeneity in the simulated system.
+
+NOTE: 9 % of the run time was spent communicating energies,
+      you might want to increase some nst* mdp options
+
+               Core t (s)   Wall t (s)        (%)
+       Time:     5411.264      169.184     3198.4
+                 (ns/day)    (hour/ns)
+Performance:        0.997       24.076
+
+GROMACS reminds you: "I went to Venice and looked at the paintings of Canaletto to understand how he presented perspective, and it turned out it was an exponential law. If I had published this, maybe there would be a Karplus law in art theory as well as the Karplus equation in NMR" (Martin Karplus, Nobel lecture 2013)
+

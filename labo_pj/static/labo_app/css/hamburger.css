@@ -1,0 +1,66 @@
+.wrapper {
+    position: relative;
+    background: #f5f5f5;    
+}
+/* ハンバーガーメニュー */
+.hamburger {
+    width: 30px;
+    height: 30px;
+    background: #92e2fa;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 0 0 auto;
+    /* position: absolute;
+    z-index: 999; */
+}
+.hamburger:hover {
+    cursor: pointer;
+}
+.hamburger span {
+    background: #fff;
+    width: 25px;
+    height: 2px;
+    position: absolute;
+    transition: 0.3s ease-out;
+}
+.hamburger span:nth-of-type(1) {
+    top: 15px;
+}
+.hamburger span:nth-of-type(3) {
+    bottom: 15px;
+}
+/* ハンバーガーメニューにactiveクラスがついたときのスタイル */
+.hamburger.active span:nth-of-type(1) {
+    transform: translateY(9px) rotate(-45deg);
+    transition: 0.3s ease-out;
+}
+.hamburger.active span:nth-of-type(3) {
+    transform: translateY(-9px) rotate(45deg);
+    transition: 0.3s ease-out;
+}
+.hamburger.active span:nth-of-type(2) {
+    opacity: 0;
+}
+/* メニュー */
+.menu {
+    width: 100%;
+    background: #84f2f8;
+    color: #fff;
+    position: absolute;
+    padding-top: 40px;
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+}
+li {
+    margin-bottom: 10px;
+}
+/* メニューにopenクラスがついたときのスタイル */
+.menu.open {
+    height: 13rem;
+    opacity: 1;
+    visibility: visible;
+}

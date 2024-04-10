@@ -1,0 +1,9 @@
+[ HOH ]
+ [ atoms ]
+   OW    ow           -0.834    0
+   HW1   hw            0.417    0
+   HW2   hw            0.417    0
+ [ bonds ]
+   OW   HW1
+   OW   HW2
+

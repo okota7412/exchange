@@ -1,0 +1,24 @@
+; Preset parameters
+integrator      = md           
+nstxout         = 0          
+nstvout         = 0          
+nstxtcout       = 1000       
+nstenergy       = 10000        
+nstlog          = 10000
+continuation    = no          
+constraint_algorithm = lincs  
+constraints     = h-bonds     
+lincs_iter      = 1           
+lincs_order     = 4           
+tcoupl          = nose-hoover
+tc-grps         = system  
+tau_t           = 0.5 
+pbc             = xyz   
+DispCorr        = EnerPres
+compressibility = 4.5e-5 4.5e-5 
+pcoupl = parrinello-rahman
+pcoupltype = isotropic
+ref-p = 1.013000 1.013000
+nsteps = 1000000
+dt = 0.002000
+ref_t =298.150000
