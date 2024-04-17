@@ -1,7 +1,0 @@
-gmx insert-molecules -f ./input/empty.pdb -ci ./pdb/水.pdb -nmol 50 -box 3 3 3 -o ./output/box.pdb
-gmx pdb2gmx -f ./output/box.pdb -o ./output/conf.gro -p topol.top -i posre.itp -ff gaff -water tip3p
-gmx editconf -f ./output/conf.gro -o ./output/conf_box.gro -box 3 3 3
-gmx grompp -f ./input/emin.mdp -c ./output/conf_box.gro -p topol.top -o ./output/emin.tpr -po ./output/mdout.mdp
-gmx mdrun -s ./output/emin.tpr -deffnm ./output/emin -v
-gmx grompp -f ./input/md.mdp -c ./output/emin.gro -p topol.top -o ./output/md.tpr
-gmx mdrun -s ./output/md.tpr -deffnm ./output/md -v

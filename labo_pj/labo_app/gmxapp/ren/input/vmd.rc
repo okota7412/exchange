@@ -1,5 +1,0 @@
-menu main on
-package require pbctools
-pbc box
-mol modstyle 0 top vdw
-animate forward

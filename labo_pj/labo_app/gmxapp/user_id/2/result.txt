@@ -1,46 +1,0 @@
-               :-) GROMACS - gmx rdf, 2021.4-Ubuntu-2021.4-2 (-:
-
-                            GROMACS is written by:
-     Andrey Alekseenko              Emile Apol              Rossen Apostolov     
-         Paul Bauer           Herman J.C. Berendsen           Par Bjelkmar       
-       Christian Blau           Viacheslav Bolnykh             Kevin Boyd        
-     Aldert van Buuren           Rudi van Drunen             Anton Feenstra      
-    Gilles Gouaillardet             Alan Gray               Gerrit Groenhof      
-       Anca Hamuraru            Vincent Hindriksen          M. Eric Irrgang      
-      Aleksei Iupinov           Christoph Junghans             Joe Jordan        
-    Dimitrios Karkoulis            Peter Kasson                Jiri Kraus        
-      Carsten Kutzner              Per Larsson              Justin A. Lemkul     
-       Viveca Lindahl            Magnus Lundborg             Erik Marklund       
-        Pascal Merz             Pieter Meulenhoff            Teemu Murtola       
-        Szilard Pall               Sander Pronk              Roland Schulz       
-       Michael Shirts            Alexey Shvetsov             Alfons Sijbers      
-       Peter Tieleman              Jon Vincent              Teemu Virolainen     
-     Christian Wennberg            Maarten Wolf              Artem Zhmurov       
-                           and the project leaders:
-        Mark Abraham, Berk Hess, Erik Lindahl, and David van der Spoel
-
-Copyright (c) 1991-2000, University of Groningen, The Netherlands.
-Copyright (c) 2001-2019, The GROMACS development team at
-Uppsala University, Stockholm University and
-the Royal Institute of Technology, Sweden.
-check out http://www.gromacs.org for more information.
-
-GROMACS is free software; you can redistribute it and/or modify it
-under the terms of the GNU Lesser General Public License
-as published by the Free Software Foundation; either version 2.1
-of the License, or (at your option) any later version.
-
-GROMACS:      gmx rdf, version 2021.4-Ubuntu-2021.4-2
-Executable:   /usr/bin/gmx
-Data prefix:  /usr
-Working dir:  /home/labo_pj/labo_app/gmxapp/user_id/2
-Command line:
-  gmx rdf -f ./output/md.xtc -s ./output/md.tpr -o ./output/Water-Water_rdf.xvg -selrpos mol_com -seltype mol_com -ref Water -sel Water -b 300
-
-Reading file ./output/md.tpr, VERSION 2021.4-Ubuntu-2021.4-2 (single precision)
-Reading file ./output/md.tpr, VERSION 2021.4-Ubuntu-2021.4-2 (single precision)
-Reading frame       0 time    0.000   Reading frame       0 time  300.000   Reading frame       1 time  302.000   Reading frame       2 time  304.000   Reading frame       3 time  306.000   Reading frame       4 time  308.000   Reading frame       5 time  310.000   Reading frame       6 time  312.000   Reading frame       7 time  314.000   Reading frame       8 time  316.000   Reading frame       9 time  318.000   Reading frame      10 time  320.000   Reading frame      11 time  322.000   Reading frame      12 time  324.000   Reading frame      13 time  326.000   Reading frame      14 time  328.000   Reading frame      15 time  330.000   Reading frame      16 time  332.000   Reading frame      17 time  334.000   Reading frame      18 time  336.000   Reading frame      19 time  338.000   Reading frame      20 time  340.000   Reading frame      30 time  360.000   Reading frame      40 time  380.000   Reading frame      50 time  400.000   Reading frame      60 time  420.000   Reading frame      70 time  440.000   Reading frame      80 time  460.000   Reading frame      90 time  480.000   Reading frame     100 time  500.000   Reading frame     110 time  520.000   Reading frame     120 time  540.000   Reading frame     130 time  560.000   Reading frame     140 time  580.000   Reading frame     150 time  600.000   Reading frame     160 time  620.000   Reading frame     170 time  640.000   Reading frame     180 time  660.000   Reading frame     190 time  680.000   Reading frame     200 time  700.000   Reading frame     300 time  900.000   Reading frame     400 time 1100.000   Reading frame     500 time 1300.000   Reading frame     600 time 1500.000   Reading frame     700 time 1700.000   Reading frame     800 time 1900.000   Reading frame     900 time 2100.000   Reading frame    1000 time 2300.000   Reading frame    1100 time 2500.000   Reading frame    1200 time 2700.000   Reading frame    1300 time 2900.000   
-Analyzed 1351 frames, last time 3000.000
-
-GROMACS reminds you: "I have noticed a large, negative correlation between having a well-defined mission workload and concern for the Top500. It's almost like LINPACK is what you focus on when you don't know what to focus on." (Jeff Hammond)
-
